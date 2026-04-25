@@ -1,0 +1,1263 @@
+{
+  "name": "Autonomous AI Business Intelligence and Market Analysis System",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "description",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "publishedAt",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "source",
+              "value": "={{ $json.author }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "93e220fa-c282-4757-844e-120fe648d87a",
+      "name": "Prepare Raw News Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2576,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "options": {
+          "systemMessage": "You are a sentiment analysis expert.\n\nAnalyze the provided news article and determine:\n1. sentiment → must be one of: \"positive\", \"negative\", or \"neutral\"\n2. confidence → a number between 0 and 100\n3. reasoning → a short explanation (1-2 sentences)\n\nIMPORTANT RULES:\n- Return ONLY a valid JSON object\n- Do NOT include markdown, text, or explanation outside JSON\n- Do NOT include field descriptions, schema, or extra keys\n- Ensure keys are exactly: sentiment, confidence, reasoning\n\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"sentiment\": {\n      \"type\": \"string\"\n    },\n    \"confidence\": {\n      \"type\": \"number\"\n    },\n    \"reasoning\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\"sentiment\", \"confidence\", \"reasoning\"]\n}"
+        }
+      },
+      "id": "07f91c6b-6d90-493a-81aa-c4ca931e2c8e",
+      "name": "Sentiment Analysis Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -2128,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "title",
+              "value": "={{ $('Aggregate').item.json.data[0].title }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "description",
+              "value": "={{ $('Aggregate').item.json.data[0].description }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "url",
+              "value": "={{ $('Aggregate').item.json.data[0].url }}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "publishedAt",
+              "value": "={{ $('Aggregate').item.json.data[0].publishedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "source",
+              "value": "={{ $('Aggregate').item.json.data[0].source }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "sentiment",
+              "value": "={{ JSON.parse($('Sentiment Analysis Agent').item.json.output).sentiment }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "confidence",
+              "value": "={{ JSON.parse($('Sentiment Analysis Agent').item.json.output).confidence }}",
+              "type": "number"
+            },
+            {
+              "id": "id-8",
+              "name": "reasoning",
+              "value": "={{ JSON.parse($('Sentiment Analysis Agent').item.json.output).reasoning }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d1fe36e-0086-4eae-9727-81eca37abc82",
+      "name": "Prepare Sentiment Results",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1488,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "4f887909-20e8-4ed8-a7ae-478c5713f90e",
+      "name": "Aggregate Last 10 Articles",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Strategic Market Intelligence Agent.\n\nInput:\n- Aggregated news articles\n- Sentiment analysis\n- Detected trends\n- Extracted entities (companies, sectors, keywords)\n\nData:\n{\n  \"trends\": {{ $json.output }},\n  \"articles\": {{ JSON.stringify($('Aggregate Last 10 Articles').item.json.data) }},\n  \"entities\": {{ $('Competator Agent').item.json.output }}\n}\nYour task:\n\n1. Identify overall market trend (bullish / bearish / neutral)\n2. Analyze which industries/sectors are growing or declining\n3. Identify key companies driving the trends\n4. Detect business opportunities\n5. Identify risks and uncertainties\n6. Generate clear strategic recommendations\n7. Prioritize each recommendation (high / medium / low)\n8. Assign confidence score (0–100)\n9. Provide a concise executive summary\n\nReturn ONLY valid JSON:\n\n{\n  \"marketTrend\": \"\",\n  \"sectorInsights\": \"\",\n  \"keyPlayers\": [],\n  \"opportunities\": [],\n  \"risks\": [],\n  \"recommendations\": [\n    {\n      \"action\": \"\",\n      \"priority\": \"\"\n    }\n  ],\n  \"confidenceScore\": 0,\n  \"summary\": \"\"\n}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a senior strategic business analyst.\n\nThink like a decision-maker, not a summarizer.\n\nFocus on:\n- cross-article patterns\n- business impact\n- competitive landscape\n- actionable insights\n\nAvoid generic statements.\n\nPrioritize clarity, reasoning, and decision usefulness.\n\nReturn only structured JSON."
+        }
+      },
+      "id": "8ab8247d-9768-476d-af02-e4caabffc0d4",
+      "name": "Strategic Insights Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -736,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "marketTrends",
+              "value": "={{ $('Trend Agent').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "businessImpact",
+              "value": "={{ JSON.parse($json.output).scenarios[0].impact}}",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "recommendations",
+              "value": "={{ JSON.parse($('Strategic Insights Agent').item.json.output).recommendations }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "risk",
+              "value": "={{ JSON.parse($json.output).scenarios[0].risk }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "action",
+              "value": "={{ JSON.parse($json.output).scenarios[0].action}}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "expectedOutcome",
+              "value": "={{ JSON.parse($json.output).scenarios[0].expectedOutcome}}",
+              "type": "string"
+            },
+            {
+              "id": "09059680-2b7f-405f-831f-84ca588e6d68",
+              "name": "successProbability",
+              "value": "={{ JSON.parse($json.output).scenarios[0].successProbability}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb8135b1-83d9-440a-806c-3271040d00ae",
+      "name": "Prepare Insights Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "4f0904c3-cd8b-440d-b94c-a70fdea8d41e",
+      "name": "Groq Insights Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        224
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "aMuxxEOWepqkjPvE",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -2224,
+        -432
+      ],
+      "id": "6117f712-5234-4f87-913c-34010a48606d",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -2016,
+        -432
+      ],
+      "id": "ba2c44c3-de6e-4b99-8df0-8d3467ae5489",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        272
+      ],
+      "id": "d66e25a9-8a9f-434e-83c8-2391ebdd14d0",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "aMuxxEOWepqkjPvE",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['RSS URL'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -2816,
+        16
+      ],
+      "id": "d48f8320-2b74-480d-9eaa-569c6cafe9bc",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -3296,
+        16
+      ],
+      "id": "e18f57d0-3041-41b9-8c0c-2a0fd9a893f8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Trend Detection Agent.\n\nHere is a list of recent news articles:\n\n{{ JSON.stringify($json.data) }}\n\nYour task:\n\n1. Identify emerging trends across all articles\n2. Detect repeated topics or patterns\n3. Determine overall trend direction (bullish / bearish / neutral)\n4. Extract key hot topics\n\nReturn ONLY valid JSON in this format:\n\n{\n  \"emergingTrends\": [],\n  \"trendDirection\": \"\",\n  \"hotTopics\": []\n}",
+        "options": {
+          "systemMessage": "You are an expert market trend analyst.\n\nAnalyze multiple news articles collectively (not individually).\n\nFocus on:\n- patterns across articles\n- repeated themes\n- changes in sentiment\n- emerging signals\n\nDo NOT summarize articles.\nDo NOT explain each article separately.\n\nInstead, detect macro-level trends.\n\nReturn ONLY valid JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1024,
+        -416
+      ],
+      "id": "d8ac59e7-5988-40c8-aa30-b7a94928edb2",
+      "name": "Trend Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1824,
+        528
+      ],
+      "id": "f644d178-4fb5-486b-a8a4-f6c1db6ede03",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "aMuxxEOWepqkjPvE",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an Entity Extraction Agent.\n\nHere is a news article:\n\nTitle: {{ $('Aggregate').item.json.data[0].title }}\nDescription: {{ $('Aggregate').item.json.data[0].description }}\n\nYour task:\n\n1. Extract company names\n2. Identify products/services mentioned\n3. Identify industry sector\n4. Identify keywords relevant to business\n\nReturn ONLY valid JSON:\n\n{\n  \"companies\": [],\n  \"products\": [],\n  \"sector\": \"\",\n  \"keywords\": []\n}",
+        "options": {
+          "systemMessage": "You are an expert in business entity extraction.\n\nFocus on identifying:\n- company names (e.g., Google, Tesla)\n- products or services\n- industry sectors (e.g., AI, Finance, Healthcare)\n- important business keywords\n\nDo NOT summarize the article.\n\nReturn only structured JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1824,
+        288
+      ],
+      "id": "e81b1199-d264-4047-a957-441646b1aa38",
+      "name": "Competator Agent"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        624
+      ],
+      "id": "bee7e06e-ce44-4083-b3a0-fe8dcdfbf037",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "aMuxxEOWepqkjPvE",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Business Simulation Agent.\n\nInput:\n- Strategic recommendations\n- Market trends\n- Business insights\n\nData:\n\n{\n  \"strategy\": {{ $json.output }},\n  \"trends\": {{ $('Trend Agent').item.json.output }},\n  \"entities\": {{ $('Competator Agent').item.json.output }}\n}\nYour task:\n\n1. Simulate possible outcomes if recommendations are implemented\n2. Predict impact on business growth\n3. Identify risks of each action\n4. Estimate success probability (0–100)\n5. Provide future scenario insights\n\nReturn ONLY valid JSON:\n\n{\n  \"scenarios\": [\n    {\n      \"action\": \"\",\n      \"expectedOutcome\": \"\",\n      \"impact\": \"\",\n      \"risk\": \"\",\n      \"successProbability\": 0\n    }\n  ],\n  \"overallPrediction\": \"\",\n  \"confidence\": 0\n}",
+        "options": {
+          "systemMessage": "You are an expert business strategist and forecasting analyst.\n\nThink in terms of cause-and-effect.\n\nDo not repeat recommendations.\nInstead, simulate what will happen if actions are taken.\n\nFocus on:\n- outcomes\n- risks\n- probabilities\n- business impact\n\nReturn only structured JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -432,
+        368
+      ],
+      "id": "86d84ee8-4c3b-4738-bda1-a1bb5b243ad6",
+      "name": "Simulation Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        -160
+      ],
+      "id": "092f8a9b-c22f-4b85-a6d6-b7dd0b51705c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1IkmGMskaIeADH4K",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -144
+      ],
+      "id": "5f460923-7e3b-45a3-afd6-833846362faa",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "aMuxxEOWepqkjPvE",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Risk Intelligence Agent.\n\nInput:\n- Simulation results\n- Strategic insights\n- Market trends\n\nData:\n\n{\n  \"simulation\": {{ $('Simulation Agent').item.json.output }},\n  \"strategy\": {{ $('Strategic Insights Agent').item.json.output }},\n  \"trends\": {{ $('Trend Agent').item.json.output }}\n}\n\nYour task:\n\n1. Calculate overall risk score (0–100)\n2. Assign risk level (low / medium / high)\n3. Explain key reasons for risk\n4. Determine if alert should be triggered (true/false)\n5. Identify top risk factors\n\nReturn ONLY valid JSON:\n\n{\n  \"riskScore\": 0,\n  \"riskLevel\": \"\",\n  \"alert\": false,\n  \"riskFactors\": [],\n  \"reason\": \"\"\n}",
+        "options": {
+          "systemMessage": "You are an expert risk analyst.\n\nEvaluate risk based on:\n- predicted outcomes\n- market conditions\n- competitive landscape\n\nThink critically:\n- high growth + high uncertainty → medium/high risk\n- stable trends + strong signals → low risk\n\nDo not guess randomly.\n\nReturn only structured JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        80,
+        -368
+      ],
+      "id": "74f840f6-7176-4527-8bca-6c4aea72c10e",
+      "name": "Risk Alert Agent",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1f6a036f-f64a-4908-8908-315a14665d27",
+              "leftValue": "={{ String($json.alert) === \"true\" }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        0
+      ],
+      "id": "3d244234-18f7-400d-bc23-4773ee1dfd9c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "theengineer1324@gmail.com",
+        "subject": "=🚨 HIGH RISK MARKET ALERT - {{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+        "message": "=<h2 style=\"color:#d32f2f;\">🚨 HIGH RISK MARKET ALERT</h2>\n\n<p><strong>Summary:</strong><br>\n{{ $json.reason }}\n</p>\n\n<hr>\n\n<h3>📊 Market Situation</h3>\n<p><strong>Trend:</strong>{{ $json.markerTrends }} </p>\n<p><strong>Business Impact:</strong> {{ $json.businessImpact }}</p>\n\n<hr>\n\n<h3>⚠️ Risk Assessment</h3>\n<p><strong>Risk Level:</strong> {{ $json.riskLevel }}</p>\n<p><strong>Risk Score:</strong> {{ $json.riskScore }}</p>\n<p><strong>Reason:</strong> {{ $json.reason }}</p>\n\n<ul>\n{{ $json.riskFactor }}\n</ul>\n\n<hr>\n\n<h3>📈 Predicted Outcomes</h3>\n<ul>\n{{ JSON.parse($('Simulation Agent').item.json.output).scenarios.map(s => \n`<li><strong>${s.action}</strong><br>\nImpact: ${s.impact} | Success: ${s.successProbability}%<br>\nOutcome: ${s.expectedOutcome}</li>`\n).join('') }}\n</ul>\n\n<hr>\n\n<h3>💡 Recommended Actions</h3>\n<ul>\n{{ $json.recommendations.map(r => \n`<li><strong>${r.action}</strong> (Priority: ${r.priority})</li>`\n).join('') }}\n</ul>\n\n<hr>\n\n<p style=\"color:#d32f2f;\"><strong>⚡ Immediate attention required.</strong> Strategic action is recommended to mitigate potential risks.</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        -144
+      ],
+      "id": "14209d10-36fb-4ff6-b5ce-9028b1f22f4b",
+      "name": "Send Gmail True Alert",
+      "webhookId": "34ccd459-4200-44ca-90a7-336e6422b7ea",
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wnkfT08TtoSc2lqI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "theengineer1324@gmail.com",
+        "subject": "=🚨 LOW RISK MARKET ALERT - {{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+        "message": "=<h2 style=\"color:#2e7d32;\">📊 MARKET INTELLIGENCE UPDATE</h2>\n\n<p><strong>Summary:</strong><br>\n{{ JSON.parse($('Risk Alert Agent').item.json.output).reason }}\n</p>\n\n<hr>\n\n<h3>📈 Market Trends</h3>\n<p>\n<p>\n{{ JSON.parse($('Trend Agent').item.json.output.replace(/```json|```/g, '')).emergingTrends.join(', ') }}\n</p>\n</p>\n\n<hr>\n\n<h3>💼 Business Impact</h3>\n<p>\n{{ $('Prepare Insights Data').item.json.businessImpact }}\n</p>\n\n<hr>\n\n<h3>📊 Risk Overview</h3>\n<p><strong>Risk Level:</strong> {{ JSON.parse($('Risk Alert Agent').item.json.output).riskLevel }}</p>\n<p><strong>Risk Score:</strong> {{ JSON.parse($('Risk Alert Agent').item.json.output).riskScore }}</p>\n\n<hr>\n\n<h3>🚀 Opportunities & Recommendations</h3>\n<ul>\n{{ JSON.parse($('Prepare Insights Data').item.json.recommendations).map(r => \n`<li><strong>${r.action}</strong> (Priority: ${r.priority})</li>`\n).join('') }}\n</ul>\n\n<hr>\n\n<h3>🔮 Expected Outcomes</h3>\n<ul>\n{{ JSON.parse($('Simulation Agent').item.json.output).scenarios.map(s => \n`<li>${s.expectedOutcome} (Success: ${s.successProbability}%)</li>`\n).join('') }}\n</ul>\n\n<hr>\n\n<p style=\"color:#2e7d32;\">\n<strong>✅ Market conditions are stable. Continue monitoring and strategic execution.</strong>\n</p>",
+        "options": {}
+      },
+      "id": "54e2482e-07e7-4c9f-ae57-68fa3d9032c1",
+      "name": "Send Email False Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        96
+      ],
+      "webhookId": "510c044e-ab74-455b-96bf-2ff292302184",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wnkfT08TtoSc2lqI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14LfWnfcPEjRs7n3nSA-V6DFib-ajf1pIVBLvAYiWbW4",
+          "mode": "list",
+          "cachedResultName": "Source Control Example",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14LfWnfcPEjRs7n3nSA-V6DFib-ajf1pIVBLvAYiWbW4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14LfWnfcPEjRs7n3nSA-V6DFib-ajf1pIVBLvAYiWbW4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3040,
+        16
+      ],
+      "id": "df096dfd-e9f1-4163-bc35-aa9cf6b2ff93",
+      "name": "Blogs_News_data",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BO5ONZxUv2EpTYhL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18IQ5W0eODYnrCgz87mHjGoTiwMst66GCG2twePTA4B8",
+          "mode": "list",
+          "cachedResultName": "Blogs_News_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18IQ5W0eODYnrCgz87mHjGoTiwMst66GCG2twePTA4B8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18IQ5W0eODYnrCgz87mHjGoTiwMst66GCG2twePTA4B8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "description": "={{ $json.description }}",
+            "url": "={{ $json.url }}",
+            "publishedAt": "={{ $json.publishedAt }}",
+            "source": "={{ $json.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "publishedAt",
+              "displayName": "publishedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2368,
+        16
+      ],
+      "id": "b642eb8e-3bc4-40af-95b8-34919ec3a1f7",
+      "name": "Blogs_News_store",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BO5ONZxUv2EpTYhL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1REI8l6CrYQQHaer4p4B08BOiNHqEtrjECFGFRfk7q78",
+          "mode": "list",
+          "cachedResultName": "sentiment_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1REI8l6CrYQQHaer4p4B08BOiNHqEtrjECFGFRfk7q78/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1REI8l6CrYQQHaer4p4B08BOiNHqEtrjECFGFRfk7q78/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "description": "={{ $json.description }}",
+            "url": "={{ $json.url }}",
+            "publishedAt": "={{ $json.publishedAt }}",
+            "source": "={{ $json.source }}",
+            "sentiment": "={{ $json.sentiment }}",
+            "confidence": "={{ $json.confidence }}",
+            "reasoning": "={{ $json.reasoning }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "publishedAt",
+              "displayName": "publishedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reasoning",
+              "displayName": "reasoning",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1280,
+        0
+      ],
+      "id": "9cb01dcd-5a1d-4639-b3bf-dca1c1d87048",
+      "name": "Sentiment_Details_Store",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BO5ONZxUv2EpTYhL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1iIidYStZPbCoG5mlox2dVTUjujZ-OSTLDKU3s4RzLII",
+          "mode": "list",
+          "cachedResultName": "Strategy details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iIidYStZPbCoG5mlox2dVTUjujZ-OSTLDKU3s4RzLII/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iIidYStZPbCoG5mlox2dVTUjujZ-OSTLDKU3s4RzLII/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "markerTrends": "={{ $('Trend Agent').item.json.output }}",
+            "businessImpact": "={{ JSON.parse($('Simulation Agent').item.json.output).scenarios[0].impact }}",
+            "recommendations": "={{ JSON.parse($('Strategic Insights Agent').item.json.output).recommendations }}",
+            "riskLevel": "={{ JSON.parse($json.output).riskLevel}}",
+            "riskFactor": "={{ JSON.parse($json.output).riskFactors}}",
+            "reason": "={{ JSON.parse($json.output).reason}}",
+            "riskScore": "={{ JSON.parse($json.output).riskScore}}",
+            "alert": "={{ JSON.parse($json.output).alert}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "markerTrends",
+              "displayName": "markerTrends",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessImpact",
+              "displayName": "businessImpact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recommendations",
+              "displayName": "recommendations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "riskLevel",
+              "displayName": "riskLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "riskFactor",
+              "displayName": "riskFactor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "riskScore",
+              "displayName": "riskScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "alert",
+              "displayName": "alert",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        -128
+      ],
+      "id": "18765e76-1172-43a8-a458-cf81fdb0c786",
+      "name": "Overall_Information_Store",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "BO5ONZxUv2EpTYhL",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare Raw News Data": {
+      "main": [
+        [
+          {
+            "node": "Blogs_News_store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis Agent": {
+      "main": [
+        [
+          {
+            "node": "Competator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sentiment Results": {
+      "main": [
+        [
+          {
+            "node": "Sentiment_Details_Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Last 10 Articles": {
+      "main": [
+        [
+          {
+            "node": "Trend Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strategic Insights Agent": {
+      "main": [
+        [
+          {
+            "node": "Simulation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Insights Data": {
+      "main": [
+        [
+          {
+            "node": "Risk Alert Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Insights Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Strategic Insights Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Prepare Raw News Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Blogs_News_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trend Agent": {
+      "main": [
+        [
+          {
+            "node": "Strategic Insights Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Competator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competator Agent": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sentiment Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Simulation Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulation Agent": {
+      "main": [
+        [
+          {
+            "node": "Prepare Insights Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Trend Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Risk Alert Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Alert Agent": {
+      "main": [
+        [
+          {
+            "node": "Overall_Information_Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail True Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Email False Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blogs_News_data": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blogs_News_store": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment_Details_Store": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Last 10 Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Overall_Information_Store": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fa3a970e-7e72-4cb3-b37b-01ce54e1945e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9b7c181043218339cddd8479172e19f8a9b3308360d7fdb443dd4ab8ce833cd8"
+  },
+  "id": "pvtQ8W6PU5QCej3B",
+  "tags": []
+}
