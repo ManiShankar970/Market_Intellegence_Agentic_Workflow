@@ -369,62 +369,31 @@ Interactive Business Analytics
 Advanced Visualizations
 
 **📷 Project Workflow**
-                    AI-POWERED MARKET INTELLIGENCE NETWORK
 
-┌──────────────────────────────┐
-│ 1. Schedule Trigger          │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│ 2. Collect Latest Market News│
-│    (RSS Feeds)               │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│ 3. Preprocess News Articles  │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌────────────────────────────────────────────────────┐
-│            AI Multi-Agent Processing               │
-│                                                    │
-│ • Sentiment Analysis Agent                         │
-│ • Competitor Intelligence Agent                    │
-│ • Trend Analysis Agent                             │
-│ • Strategic Insights Agent                         │
-│ • Simulation Agent                                 │
-│ • Historical Risk Comparison (Last 3 Days)         │
-│ • Risk Alert Agent                                 │
-└──────────────┬─────────────────────────────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│ 4. Store Intelligence        │
-│    (Google Sheets Database)  │
-└──────────────┬───────────────┘
-               │
-        ┌──────┴───────────────┐
-        │                      │
-        ▼                      ▼
-┌──────────────────┐   ┌──────────────────────┐
-│ Email Alerts     │   │ SheetDB API          │
-│ (High / Low Risk)│   │ Dynamic Data Access  │
-└────────┬─────────┘   └──────────┬───────────┘
-         │                        │
-         │                        ▼
-         │             ┌────────────────────────┐
-         │             │ React Dashboard        │
-         │             │ (Lovable Frontend)     │
-         │             └──────────┬─────────────┘
-         │                        │
-         └──────────────┬─────────┘
-                        ▼
-          ┌──────────────────────────────┐
-          │ Real-Time Strategic Market   │
-          │ Intelligence for Businesses  │
-          └──────────────────────────────┘
+```mermaid
+flowchart LR
+
+A[Schedule Trigger]
+--> B[Fetch Latest RSS News]
+--> C[Preprocess Articles]
+--> D[Sentiment Analysis]
+
+D --> E[Competitor Analysis]
+E --> F[Trend Analysis]
+F --> G[Strategic Insights]
+
+G --> H[Simulation]
+H --> I[Fetch Last 3 Days Data]
+I --> J[Historical Comparison]
+J --> K[Risk Assessment]
+
+K --> L[Store Results in Google Sheets]
+
+L --> M[Executive Email Alerts]
+L --> N[SheetDB API]
+N --> O[Dynamic Dashboard]
+O --> P[Business Users]
+```
 
 👨‍💻 Developed By
 
