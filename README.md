@@ -59,43 +59,86 @@ The platform consists of multiple AI agents working together as an autonomous st
 Each agent specializes in one business function and collaborates with other agents to generate executive-level insights.
 
 **🏗 System Architecture**
-RSS News Sources
-        │
-        ▼
-Raw News Processing
-        │
-        ▼
-Sentiment Analysis Agent
-        │
-        ▼
-Competitor Intelligence Agent
-        │
-        ▼
-Trend Analysis Agent
-        │
-        ▼
-Strategic Insights Agent
-        │
-        ▼
-Simulation Agent
-        │
-        ▼
-Historical Risk Intelligence
-(Last 3 Days Comparison)
-        │
-        ▼
-Risk Alert Agent
-        │
-        ├────────────► Executive Email Alerts
-        │
-        ▼
-Google Sheets Database
-        │
-        ▼
-SheetDB API
-        │
-        ▼
-Dynamic Lovable Dashboard
++----------------------+
+|    Schedule Trigger  |
++----------+-----------+
+           |
+           v
++----------------------+
+|   RSS News Sources   |
++----------+-----------+
+           |
+           v
++----------------------+
+| News Preprocessing   |
++----------+-----------+
+           |
+           v
++----------------------+
+| AI Multi-Agent System|
++----------+-----------+
+           |
+           +------------------------------------------------------------+
+           |                                                            |
+           v                                                            |
++----------------------+                                                |
+| Sentiment Agent      |                                                |
++----------+-----------+                                                |
+           |                                                            |
+           +-------------------+---------------------+------------------+
+                               |                     |
+                               v                     v
+                  +----------------------+  +----------------------+
+                  | Competitor Agent     |  | Trend Analysis Agent |
+                  +----------+-----------+  +----------+-----------+
+                             \                    /
+                              \                  /
+                               \                /
+                                v              v
+                         +---------------------------+
+                         | Strategic Insights Agent  |
+                         +------------+--------------+
+                                      |
+                                      v
+                         +---------------------------+
+                         |     Simulation Agent      |
+                         +------------+--------------+
+                                      |
+                                      v
+                         +---------------------------+
+                         | Historical Comparison     |
+                         | (Last 3 Days Intelligence)|
+                         +------------+--------------+
+                                      |
+                                      v
+                         +---------------------------+
+                         |     Risk Alert Agent      |
+                         +------------+--------------+
+                                      |
+                +---------------------+----------------------+
+                |                                            |
+                v                                            v
+      +----------------------+                 +----------------------+
+      | Executive Email      |                 | Google Sheets        |
+      | Alerts               |                 | Intelligence Store   |
+      +----------------------+                 +----------+-----------+
+                                                          |
+                                                          v
+                                               +----------------------+
+                                               |     SheetDB API      |
+                                               +----------+-----------+
+                                                          |
+                                                          v
+                                               +----------------------+
+                                               | React Dashboard      |
+                                               | (Lovable Frontend)   |
+                                               +----------+-----------+
+                                                          |
+                                                          v
+                                               +----------------------+
+                                               | Business Decision    |
+                                               | Makers / Users       |
+                                               +----------------------+
 
 **🤖 AI Agent Workflow**
 **1️⃣ Trend Agent**
@@ -384,31 +427,62 @@ Interactive Business Analytics
 Advanced Visualizations
 
 **📷 Project Workflow**
-RSS News
-      │
-      ▼
-AI Agents
-      │
-      ▼
-Strategic Intelligence
-      │
-      ▼
-Simulation
-      │
-      ▼
-Historical Comparison
-      │
-      ▼
-Risk Assessment
-      │
-      ▼
-Google Sheets Database
-      │
-      ▼
-Dynamic Dashboard
-      │
-      ▼
-Executive Alerts
+                    AI-POWERED MARKET INTELLIGENCE NETWORK
+
+┌──────────────────────────────┐
+│ 1. Schedule Trigger          │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ 2. Collect Latest Market News│
+│    (RSS Feeds)               │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ 3. Preprocess News Articles  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌────────────────────────────────────────────────────┐
+│            AI Multi-Agent Processing               │
+│                                                    │
+│ • Sentiment Analysis Agent                         │
+│ • Competitor Intelligence Agent                    │
+│ • Trend Analysis Agent                             │
+│ • Strategic Insights Agent                         │
+│ • Simulation Agent                                 │
+│ • Historical Risk Comparison (Last 3 Days)         │
+│ • Risk Alert Agent                                 │
+└──────────────┬─────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ 4. Store Intelligence        │
+│    (Google Sheets Database)  │
+└──────────────┬───────────────┘
+               │
+        ┌──────┴───────────────┐
+        │                      │
+        ▼                      ▼
+┌──────────────────┐   ┌──────────────────────┐
+│ Email Alerts     │   │ SheetDB API          │
+│ (High / Low Risk)│   │ Dynamic Data Access  │
+└────────┬─────────┘   └──────────┬───────────┘
+         │                        │
+         │                        ▼
+         │             ┌────────────────────────┐
+         │             │ React Dashboard        │
+         │             │ (Lovable Frontend)     │
+         │             └──────────┬─────────────┘
+         │                        │
+         └──────────────┬─────────┘
+                        ▼
+          ┌──────────────────────────────┐
+          │ Real-Time Strategic Market   │
+          │ Intelligence for Businesses  │
+          └──────────────────────────────┘
 
 👨‍💻 Developed By
 
