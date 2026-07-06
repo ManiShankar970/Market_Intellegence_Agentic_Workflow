@@ -59,86 +59,28 @@ The platform consists of multiple AI agents working together as an autonomous st
 Each agent specializes in one business function and collaborates with other agents to generate executive-level insights.
 
 **🏗 System Architecture**
-+----------------------+
-|    Schedule Trigger  |
-+----------+-----------+
-           |
-           v
-+----------------------+
-|   RSS News Sources   |
-+----------+-----------+
-           |
-           v
-+----------------------+
-| News Preprocessing   |
-+----------+-----------+
-           |
-           v
-+----------------------+
-| AI Multi-Agent System|
-+----------+-----------+
-           |
-           +------------------------------------------------------------+
-           |                                                            |
-           v                                                            |
-+----------------------+                                                |
-| Sentiment Agent      |                                                |
-+----------+-----------+                                                |
-           |                                                            |
-           +-------------------+---------------------+------------------+
-                               |                     |
-                               v                     v
-                  +----------------------+  +----------------------+
-                  | Competitor Agent     |  | Trend Analysis Agent |
-                  +----------+-----------+  +----------+-----------+
-                             \                    /
-                              \                  /
-                               \                /
-                                v              v
-                         +---------------------------+
-                         | Strategic Insights Agent  |
-                         +------------+--------------+
-                                      |
-                                      v
-                         +---------------------------+
-                         |     Simulation Agent      |
-                         +------------+--------------+
-                                      |
-                                      v
-                         +---------------------------+
-                         | Historical Comparison     |
-                         | (Last 3 Days Intelligence)|
-                         +------------+--------------+
-                                      |
-                                      v
-                         +---------------------------+
-                         |     Risk Alert Agent      |
-                         +------------+--------------+
-                                      |
-                +---------------------+----------------------+
-                |                                            |
-                v                                            v
-      +----------------------+                 +----------------------+
-      | Executive Email      |                 | Google Sheets        |
-      | Alerts               |                 | Intelligence Store   |
-      +----------------------+                 +----------+-----------+
-                                                          |
-                                                          v
-                                               +----------------------+
-                                               |     SheetDB API      |
-                                               +----------+-----------+
-                                                          |
-                                                          v
-                                               +----------------------+
-                                               | React Dashboard      |
-                                               | (Lovable Frontend)   |
-                                               +----------+-----------+
-                                                          |
-                                                          v
-                                               +----------------------+
-                                               | Business Decision    |
-                                               | Makers / Users       |
-                                               +----------------------+
+
+```mermaid
+flowchart TD
+
+A[Schedule Trigger] --> B[RSS News Sources]
+B --> C[News Preprocessing]
+
+C --> D[Sentiment Analysis Agent]
+D --> E[Competitor Intelligence Agent]
+E --> F[Trend Analysis Agent]
+F --> G[Strategic Insights Agent]
+G --> H[Simulation Agent]
+H --> I[Historical Comparison<br/>Last 3 Days Intelligence]
+I --> J[Risk Alert Agent]
+
+J --> K[Executive Email Alerts]
+J --> L[Google Sheets Intelligence Store]
+
+L --> M[SheetDB API]
+M --> N[React Dashboard<br/>Lovable Frontend]
+N --> O[Business Decision Makers]
+```
 
 **🤖 AI Agent Workflow**
 **1️⃣ Trend Agent**
